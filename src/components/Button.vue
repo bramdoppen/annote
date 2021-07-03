@@ -34,19 +34,27 @@
     appearance: none;
     cursor: pointer;
   }
+
   .button.nobutton {
     background: transparent;
     border: 0;
     text-decoration: underline;
     padding: 0;
   }
+
   .button.nobutton:hover {
     filter: brightness(1.5);
-
   }
+
+  .button.small {
+    padding: 6px 12px;
+    font-size: 16px;
+  }
+
   .button:hover {
     filter: brightness(1.05);
   }
+
   .button:focus {
     --border: rgb(0 0 0 / 20%);
   }

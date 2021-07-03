@@ -52,4 +52,14 @@ h1, h2 {
 #nav a.router-link-exact-active {
   color: #42b983;
 }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

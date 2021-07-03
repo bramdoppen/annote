@@ -1,7 +1,6 @@
 import { createStore } from 'vuex'
 import createPersistedState from "vuex-persistedstate";
 
-
 export default createStore({
   state: {
     user: null,
@@ -15,18 +14,30 @@ export default createStore({
 				lastLogin: user.lastLogin,
 			};
 		},
-  },
-  actions: {
-    login({ commit }, user) {
-      commit('login', user)
+
+    signOut(state) {
+      state.user = null;
     }
   },
+
+  actions: {
+    login({ commit }, user) {
+      commit('login', user);
+    },
+
+    signOut({ commit }) {
+      commit('signOut');
+    }
+  },
+
   modules: {
   },
+
   getters: {
     userId: state => {
       return state.user.uid;
     }
   },
+
   plugins: [createPersistedState()],
 })

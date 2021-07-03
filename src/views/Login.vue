@@ -64,32 +64,35 @@
 		methods: {
 			handleLogin(user) {
 				if (user) {
-          const userProfile = {
-            email: user.email,
-            lastLogin: user.lastLogin,
-            displayName: user.displayName,
-            uid: user.uid
-          }
+					const userProfile = {
+						email: user.email,
+						lastLogin: user.lastLogin,
+						displayName: user.displayName,
+						uid: user.uid,
+					};
 					this.$store.dispatch("login", userProfile);
 					this.redirectRouter();
 				}
 			},
 			addNewUserToDb(user) {
-				return db.collection("users").add({
-					email: user.email,
-					lastLogin: new Date(),
-					displayName: user.displayName,
-					uid: user.uid,
-				});
+				return db
+					.collection("users")
+					.doc(user.uid)
+					.set({
+						email: user.email,
+						lastLogin: new Date(),
+						displayName: user.displayName,
+						uid: user.uid,
+					});
 			},
-			createUser(user, e) {				
-        e.preventDefault();
+			createUser(user, e) {
+				e.preventDefault();
 				this.error = null;
 
 				fb.auth()
 					.createUserWithEmailAndPassword(user.email, user.password)
 					.then((userResponse) => {
-            user.uid = userResponse.user.uid;
+						user.uid = userResponse.user.uid;
 						this.addNewUserToDb(user).then(() => {
 							this.handleLogin(user);
 						});
@@ -101,22 +104,26 @@
 
 			login(user, e) {
 				e.preventDefault();
-        this.error = null;
+				this.error = null;
 
 				// try signing the user in
 				fb.auth()
 					.signInWithEmailAndPassword(user.email, user.password)
 					.then((userResponse) => {
 						// check if there is a record of this user(email) in database and get values.
-						this.getUserCredentialsFromDatabase(userResponse.user.email).then((querySnapshot) => {
-							const results = [];
-							querySnapshot.forEach((doc) => {
-								results.push(doc.data());
+						this.getUserCredentialsFromDatabase(userResponse.user.uid)
+							.then((doc) => {
+								if (doc.exists) {
+									user.uid = userResponse.user.uid;
+									user.displayName = doc.data().displayName;
+									this.handleLogin(user);
+									console.log("Document data:", doc.data());
+								}
+							})
+							.catch((error) => {
+								this.error = error;
+								console.log("Error getting document:", error);
 							});
-              user.uid = userResponse.user.uid;
-              user.displayName = results[0].displayName;
-              this.handleLogin(user)
-						});
 					})
 
 					.catch((error) => {
@@ -154,11 +161,10 @@
 				}
 			},
 
-			getUserCredentialsFromDatabase(email) {
+			getUserCredentialsFromDatabase(uid) {
 				return db
 					.collection("users")
-					.where("email", "==", email)
-					.limit(1)
+					.doc(uid)
 					.get();
 			},
 		},
