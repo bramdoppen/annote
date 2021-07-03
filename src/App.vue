@@ -2,7 +2,24 @@
   <router-view/>
 </template>
 
+<script>
+export default {
+   data() {
+    return { user: null }
+  }
+}
+</script>
+
 <style>
+
+:root {
+  --c-one: #ffcdb2;
+  --c-two: #ffb4a2;
+  --c-three: #e5989b;
+  --c-four: #b5838d;
+  --c-five: #6d6875;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -13,6 +30,14 @@
 }
 html, body {
   margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1, h2 {
+  color: var(--c-five);
 }
 
 #nav {
