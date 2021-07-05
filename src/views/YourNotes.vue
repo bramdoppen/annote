@@ -1,7 +1,11 @@
 <template>
   <div class="grid">
     <NotesList class="list" />
-    <SingleNote class="note" />
+    <div class="note">
+      <span v-if="!activeNote" class="note-empty">There is no note selected. Create a new note or select one.</span>
+      <SingleNote v-if="activeNote"/>
+
+    </div>
     <AccountTab class="accounttab" />
   </div>
 </template>
@@ -16,7 +20,14 @@ export default {
     NotesList,
     SingleNote,
     AccountTab,
+  },
+  computed: {
+    activeNote() {
+      console.log(this.$route.params.id)
+      return this.$route.params.id
+    }
   }
+
 }
 </script>
 
@@ -34,6 +45,18 @@ export default {
 
 .note {
   grid-area: note;
+  height: 100%;
+  overflow: auto;
+}
+
+.note-empty {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  opacity: 0.5;
+  background: whitesmoke;
 }
 
 .accounttab {

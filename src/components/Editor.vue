@@ -39,6 +39,7 @@ export default {
   mounted() {
     this.editor = new Editor({
       content: this.modelValue,
+      autofocus: true,
       extensions: [StarterKit],
       onUpdate: () => {
         this.$emit("update:modelValue", this.editor.getHTML());

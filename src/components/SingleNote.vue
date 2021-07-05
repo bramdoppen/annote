@@ -1,12 +1,11 @@
 <template>
 	<div class="editor" v-if="!error">
-		<span v-if="isSaving" class="saving">Saving...</span>
-		<span v-if="!isSaving" class="saving">Saved</span>
-		<header>
-			<input type="text" v-model="noteTitle" />
-		</header>
-		<button @click="deleteNote()">Delete</button>
-		<Editor v-model:modelValue="editorValue" />
+    <header class="editor-header">
+      <span v-if="isSaving" class="saving">Saving...</span>
+      <span v-if="!isSaving" class="saving">Saved</span>
+      <button @click="confirmDelete()">Delete</button>
+    </header>
+		<Editor class="editor-editor" v-model:modelValue="editorValue" />
 	</div>
 	<div class="editor" v-if="error">
 		<span>This document does not exist: {{ error }}</span>
@@ -23,7 +22,6 @@
 		},
 		data: () => {
 			return {
-				noteTitle: "",
 				editorValue: "",
 				isSaving: false,
 				savingTimeout: null,
@@ -32,20 +30,27 @@
 			};
 		},
 		methods: {
+			confirmDelete() {
+				if (window.confirm("Delete this note?")) {
+					this.deleteNote();
+				}
+			},
+
 			deleteNote() {
 				const noteId = this.$route.params.id;
 				db.collection("notes")
 					.doc(noteId)
 					.delete()
 					.then(() => {
-						console.log("Document successfully deleted!");
+						this.$router.push("/");
 					})
 					.catch((error) => {
 						this.error = error;
 					});
 			},
+
 			getData() {
-        clearTimeout(this.savingTimeout);
+				clearTimeout(this.savingTimeout);
 				const noteId = this.$route.params.id;
 				const docRef = db.collection("notes").doc(noteId);
 				this.error = null;
@@ -55,11 +60,9 @@
 					.get()
 					.then((doc) => {
 						if (doc.exists) {
-							this.noteTitle = doc.data().title;
 							this.editorValue = doc.data().editor;
 							console.log("Document data:", doc.data().editor);
 						} else {
-							// doc.data() will be undefined in this case
 							console.log("No such document!");
 						}
 					})
@@ -70,14 +73,16 @@
 						this.loaded = true;
 					});
 			},
-			updateDoc(noteTitle, editorValue) {
-				const noteId = this.$route.params.id;
-				var docRef = db.collection("notes").doc(noteId);
+			updateDoc(editorValue) {
 				this.isSaving = true;
+
+				const noteId = this.$route.params.id;
+				const documentTitle = this.createHeading(editorValue);
+				var docRef = db.collection("notes").doc(noteId);
 
 				docRef
 					.update({
-						title: noteTitle,
+						title: documentTitle,
 						editor: editorValue,
 						updated: new Date(),
 					})
@@ -85,34 +90,29 @@
 						this.isSaving = false;
 					});
 			},
+			createHeading(text) {
+				const createdDiv = document.createElement("div");
+				createdDiv.innerHTML = text.substr(0, 100);
+				return createdDiv.textContent || createdDiv.innerText || "";
+			},
 		},
 		created() {
 			this.getData();
 		},
 
-    beforeUnmount() {
-      if(this.savingTimeout) {
-        clearTimeout(this.savingTimeout);
-      }
-    },
+		beforeUnmount() {
+			if (this.savingTimeout) {
+				clearTimeout(this.savingTimeout);
+			}
+		},
 
 		watch: {
 			$route: "getData",
-			noteTitle(value) {
+			editorValue(editorValue) {
 				if (this.loaded) {
 					clearTimeout(this.savingTimeout);
 					this.savingTimeout = setTimeout(() => {
-						this.updateDoc(value, this.editorValue);
-						console.log(value);
-					}, 1000);
-				}
-			},
-			editorValue(value) {
-				if (this.loaded) {
-					clearTimeout(this.savingTimeout);
-					this.savingTimeout = setTimeout(() => {
-						this.updateDoc(this.noteTitle, value);
-						console.log(value);
+						this.updateDoc(editorValue);
 					}, 1000);
 				}
 			},
@@ -125,9 +125,20 @@
 		text-align: left;
 		padding: 40px;
 		outline: 0;
+    display: flex;
+    flex-direction: column;
 	}
+
+  .editor-header {
+    flex: 0 0 auto;
+  }
+  .editor-editor {
+    flex: 1;
+  }
+
 	.editor >>> .ProseMirror {
 		outline: 0;
+    height: 100%;
 	}
 
 	.saving {

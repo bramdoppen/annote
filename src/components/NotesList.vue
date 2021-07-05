@@ -1,10 +1,10 @@
 <template>
 	<div class="notelist">
 		<ul class="list">
-			<li class="list-item" v-for="note in noteList" :key="note.id">
-				<button class="list-button" type="button" @click="selectNote(note.id)" :class="{'current': note.id == currentNoteId}">
-					<h2>{{ note.data.title }}</h2>
-					<span>{{ getDate(note.data.updated) }}</span>
+			<li class="list-item" v-for="note in sortedNoteList" :key="note.id">
+				<button class="list-button" type="button" @click="selectNote(note.id)" :class="{ current: note.id == currentNoteId }">
+					<h2 class="title">{{ note.data.title }}</h2>
+					<span class="date">{{ getDate(note.data.updated) }}</span>
 				</button>
 			</li>
 		</ul>
@@ -33,9 +33,28 @@
 				router.push({ path: `/note/${id}` });
 			};
 
+			const isToday = (someDate) => {
+				const today = new Date();
+				return someDate.getDate() == today.getDate() && someDate.getMonth() == today.getMonth() && someDate.getFullYear() == today.getFullYear();
+			};
+
+			const buildZero = (input) => {
+				return `${input < 10 ? "0" : ""}${input}`;
+			}
+
 			const getDate = (time) => {
 				if (time && time.seconds) {
-					return new Date(time.seconds * 1000);
+					const date = new Date(time.seconds * 1000);
+
+					const day = () => {
+						if (isToday(date)) {
+							return "Today"
+						} else {
+							return `${date.getDay()}-${date.getMonth()}-${date.getFullYear()} `;
+						}
+					};
+
+					return `${day()}, ${buildZero(date.getHours())}:${buildZero(date.getMinutes())}`;
 				}
 			};
 
@@ -45,6 +64,7 @@
 					.add({
 						title: "New note",
 						uid: store.getters.userId,
+						updated: new Date(),
 						editor: "<p></p>",
 					})
 					.then((docRef) => {
@@ -79,16 +99,23 @@
 					});
 			};
 
-      const currentNoteId = computed(() => route.params.id)
+			const currentNoteId = computed(() => route.params.id);
+
+			const sortedNoteList = computed(() => {
+				const compare = (a, b) => {
+					return b.data.updated.seconds - a.data.updated.seconds;
+				};
+				return noteList.value.slice().sort(compare);
+			});
 
 			getNotes();
 
 			return {
-				noteList,
 				getDate,
 				selectNote,
 				createNew,
-        currentNoteId,
+				currentNoteId,
+				sortedNoteList,
 			};
 		},
 	};
@@ -103,33 +130,48 @@
 		height: 100vh;
 		overflow: auto;
 	}
-  .list {
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    list-style: none;
-    flex: 1;
-    margin: 0;
-  }
+	.list {
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+		list-style: none;
+		flex: 1;
+		margin: 0;
+	}
 	.list-button {
 		border: 0;
 		border-bottom: 1px solid #ddd;
 		text-align: left;
 		cursor: pointer;
-    width: 100%;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		row-gap: 6px;
+		padding: 16px 20px;
 	}
-  .list-button.current {
+	.list-button.current {
 		background: rgba(0, 0, 0, 0.05);
-  }
+	}
 	.list-button:hover {
 		background: rgba(0, 0, 0, 0.1);
 	}
-  
-  .button {
-    margin: 20px;
-  }
 
+	.button {
+		margin: 20px;
+	}
+
+	.title {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		margin: 0;
+	}
 	h2 {
-		font-size: 18px;
+		font-size: 16px;
+		line-height: 1.4;
+	}
+	.date {
+		opacity: 0.5;
 	}
 </style>
