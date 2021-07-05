@@ -6,7 +6,7 @@
 				<span v-if="!registrationActive">Login with your credentials</span>
 				<span v-if="registrationActive">Register your new account</span>
 			</header>
-			<form class="form" @submit="login">
+			<form class="form" @submit="registrationActive ? createUser(user, $event) : login(user, $event)">
 				<div class="f-row" v-if="registrationActive">
 					<label for="input-zero" class="f-label">Display name:</label>
 					<input id="input-zero" class="f-input" v-model="user.displayName" type="text" required placeholder="Display name" />
@@ -22,13 +22,14 @@
 				<div class="f-row" v-if="error">
 					<span class="errors">{{ error.message }}</span>
 				</div>
-				<Button @click="registrationActive = !registrationActive" class="nobutton">
+				<Button @click="registrationActive = !registrationActive" class="nobutton" style="margin-top: 20px;">
 					<span v-if="!registrationActive">Register</span>
 					<span v-if="registrationActive">Back to login</span>
 				</Button>
-				<Button type="submit" @click="registrationActive ? createUser(user, $event) : login(user, $event)">
-					<span v-if="!registrationActive">Login</span>
-					<span v-if="registrationActive">Register</span>
+				<Button type="submit">
+					<span v-if="!registrationActive && !loading">Login</span>
+					<span v-if="registrationActive && !loading">Register</span>
+					<span v-if="loading">Loading ...</span>
 				</Button>
 			</form>
 		</div>
@@ -50,11 +51,11 @@
 					email: null,
 					password: null,
 				},
+				loading: false,
 				registrationActive: false,
 				error: null,
 
 				userEmailForgot: null,
-				isLoading: false,
 				isForgot: false,
 				forgotMessage: null,
 				logErr: null,
@@ -88,6 +89,7 @@
 			createUser(user, e) {
 				e.preventDefault();
 				this.error = null;
+				this.loading = true;
 
 				fb.auth()
 					.createUserWithEmailAndPassword(user.email, user.password)
@@ -99,13 +101,16 @@
 					})
 					.catch((error) => {
 						this.error = error;
+					})
+					.finally(() => {
+						this.loading = false;
 					});
 			},
 
 			login(user, e) {
 				e.preventDefault();
 				this.error = null;
-
+				this.loading = true;
 				// try signing the user in
 				fb.auth()
 					.signInWithEmailAndPassword(user.email, user.password)
@@ -125,11 +130,12 @@
 								console.log("Error getting document:", error);
 							});
 					})
-
 					.catch((error) => {
 						this.error = error;
-						this.isLoading = false;
 						this.logErr = "Ongeldig e-mailadres of wachtwoord.";
+					})
+					.finally(() => {
+						this.loading = false;
 					});
 			},
 
@@ -199,6 +205,8 @@
 		display: flex;
 		flex-direction: column;
 		row-gap: 20px;
+		opacity: 0;
+		animation: showLogin 0.8s 0.4s cubic-bezier(0, 0.65, 0.16, 0.98) forwards;
 	}
 
 	.form {
@@ -239,5 +247,16 @@
 	}
 	.errors {
 		color: var(--c-three);
+	}
+
+	@keyframes showLogin {
+		0% {
+			transform: translateY(20px);
+			opacity: 0;
+		}
+		100% {
+			transform: translateY(0);
+			opacity: 1;
+		}
 	}
 </style>

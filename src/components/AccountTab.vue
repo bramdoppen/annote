@@ -15,7 +15,7 @@
 	import Button from "@/components/Button";
 	import { ref } from "vue";
 	import { useStore } from "vuex";
-  import { useRouter } from "vue-router";
+	import { useRouter } from "vue-router";
 	import { fb } from "@/functions/fbconfig.js";
 
 	export default {
@@ -24,14 +24,16 @@
 		},
 		setup() {
 			const store = useStore();
+			const router = useRouter();
 			const navOpen = ref(false);
 			const displayName = store.state.user.displayName;
 			const logout = () => {
-				fb.auth().signOut().then(() => {
-          store.dispatch('signOut');
-          const router = useRouter();
-          router.push({ path: '/login' });
-        });
+				fb.auth()
+					.signOut()
+					.then(() => {
+						store.dispatch("signOut");
+						router.push({ path: "/login" });
+					});
 			};
 			return {
 				navOpen,
