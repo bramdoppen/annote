@@ -9,7 +9,7 @@
 		<Editor v-model:modelValue="editorValue" />
 	</div>
 	<div class="editor" v-if="error">
-		<span>This document does not exist: {{error}}</span>
+		<span>This document does not exist: {{ error }}</span>
 	</div>
 </template>
 
@@ -28,6 +28,7 @@
 				isSaving: false,
 				savingTimeout: null,
 				error: null,
+				loaded: false,
 			};
 		},
 		methods: {
@@ -44,9 +45,12 @@
 					});
 			},
 			getData() {
+        clearTimeout(this.savingTimeout);
 				const noteId = this.$route.params.id;
 				const docRef = db.collection("notes").doc(noteId);
 				this.error = null;
+				this.loaded = false;
+
 				docRef
 					.get()
 					.then((doc) => {
@@ -61,6 +65,9 @@
 					})
 					.catch((error) => {
 						this.error = error;
+					})
+					.finally(() => {
+						this.loaded = true;
 					});
 			},
 			updateDoc(noteTitle, editorValue) {
@@ -68,7 +75,6 @@
 				var docRef = db.collection("notes").doc(noteId);
 				this.isSaving = true;
 
-				// To update age and favorite color:
 				docRef
 					.update({
 						title: noteTitle,
@@ -77,28 +83,38 @@
 					})
 					.then(() => {
 						this.isSaving = false;
-						console.log("Document successfully updated!");
 					});
 			},
 		},
 		created() {
 			this.getData();
 		},
+
+    beforeUnmount() {
+      if(this.savingTimeout) {
+        clearTimeout(this.savingTimeout);
+      }
+    },
+
 		watch: {
 			$route: "getData",
 			noteTitle(value) {
-				clearTimeout(this.savingTimeout);
-				this.savingTimeout = setTimeout(() => {
-					this.updateDoc(value, this.editorValue);
-					console.log(value);
-				}, 1000);
+				if (this.loaded) {
+					clearTimeout(this.savingTimeout);
+					this.savingTimeout = setTimeout(() => {
+						this.updateDoc(value, this.editorValue);
+						console.log(value);
+					}, 1000);
+				}
 			},
 			editorValue(value) {
-				clearTimeout(this.savingTimeout);
-				this.savingTimeout = setTimeout(() => {
-					this.updateDoc(this.noteTitle, value);
-					console.log(value);
-				}, 1000);
+				if (this.loaded) {
+					clearTimeout(this.savingTimeout);
+					this.savingTimeout = setTimeout(() => {
+						this.updateDoc(this.noteTitle, value);
+						console.log(value);
+					}, 1000);
+				}
 			},
 		},
 	};
