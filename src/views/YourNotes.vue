@@ -4,7 +4,6 @@
     <div class="note">
       <span v-if="!activeNote" class="note-empty">There is no note selected. Create a new note or select one.</span>
       <SingleNote v-if="activeNote"/>
-
     </div>
     <AccountTab class="accounttab" />
   </div>

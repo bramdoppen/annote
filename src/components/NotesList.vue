@@ -8,7 +8,9 @@
 				</button>
 			</li>
 		</ul>
-		<Button @click="createNew()" class="button">New note</Button>
+		<div class="button-holder">
+			<Button @click="createNew()" class="button">New note</Button>
+		</div>
 	</div>
 </template>
 
@@ -123,12 +125,11 @@
 
 <style scoped>
 	.notelist {
-		background: #f5f5f5;
 		border-right: 1px solid #ddd;
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
-		overflow: auto;
+		overflow: hidden;
 	}
 	.list {
 		display: flex;
@@ -137,10 +138,10 @@
 		list-style: none;
 		flex: 1;
 		margin: 0;
+		overflow: auto;
 	}
 	.list-button {
 		border: 0;
-		border-bottom: 1px solid #ddd;
 		text-align: left;
 		cursor: pointer;
 		width: 100%;
@@ -148,16 +149,29 @@
 		flex-direction: column;
 		row-gap: 6px;
 		padding: 16px 20px;
+		background: #fffcfa;
+	}
+	.list-item::after {
+		content: "";
+		border-bottom: 1px solid #ddd;			
+
 	}
 	.list-button.current {
 		background: rgba(0, 0, 0, 0.05);
 	}
 	.list-button:hover {
-		background: rgba(0, 0, 0, 0.1);
+		background: var(--c-one);
+		filter: brightness(1.1);
+		
 	}
-
+	.button-holder {
+		position: sticky;
+		bottom: 0;
+		border-top: 1px solid #ddd;
+	}
 	.button {
 		margin: 20px;
+		width: calc(100% - 40px);
 	}
 
 	.title {
