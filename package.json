@@ -10,6 +10,7 @@
   "dependencies": {
     "@tiptap/starter-kit": "^2.0.0-beta.81",
     "@tiptap/vue-3": "^2.0.0-beta.45",
+    "@vueuse/core": "^6.3.3",
     "core-js": "^3.6.5",
     "firebase": "^8.6.8",
     "register-service-worker": "^1.7.1",
@@ -28,5 +29,18 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0"
+  },
+  "vue": {
+    "pwa": {
+      "name": "Annoté",
+      "themeColor": "#ffffff",
+      "msTileColor": "#ffffff",
+      "faviconSVG": "img/favicon.svg",
+      "favicon32": "img/favicon-32x32.png",
+      "favicon16": "img/favicon-16x16.png",
+      "appleTouchIcon": "img/apple-touch-icon.png",
+      "maskIcon": "img/safari-pinned-tab.svg",
+      "msTileImage": "img/mstile-150x150.png"
+    }
   }
 }

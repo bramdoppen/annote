@@ -127,6 +127,7 @@
 		outline: 0;
     display: flex;
     flex-direction: column;
+		min-height: 100%;
 	}
 
   .editor-header {
@@ -134,11 +135,12 @@
   }
   .editor-editor {
     flex: 1;
+		display: flex;
+		min-height: 100%;
   }
 
 	.editor >>> .ProseMirror {
 		outline: 0;
-    height: 100%;
 	}
 
 	.saving {
