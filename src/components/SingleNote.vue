@@ -141,6 +141,7 @@
 
 	.editor >>> .ProseMirror {
 		outline: 0;
+		width: 100%;
 	}
 
 	.saving {
